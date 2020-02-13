@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import LoadingComponent from "./LoadingComponent";
 import axios from "axios";
 
 const UiComponent = ({ cityname }) => {
@@ -39,7 +40,8 @@ class WeatherComponent extends Component {
     this.state = {
       weatherData: [],
       city: "",
-      isVisible: false
+      isVisible: false,
+      isLoading: false
     };
     this.apikey = "EGbDx8Ku6WQxGWpwkB4KoWZ95jEjfxxb";
   }
@@ -64,34 +66,37 @@ class WeatherComponent extends Component {
     });
   };
 
-  componentDidMount() {
-    this.fetchDetails = async city => {
-      const cityDetails = await this.cityData(
-        `http://dataservice.accuweather.com/locations/v1/cities/search`,
-        city
-      );
-      const { Key } = cityDetails;
-      const weatherDetails = await this.currentCondition(
-        `http://dataservice.accuweather.com/currentconditions/v1/${Key}`
-      );
-      const requestData = {
-        cityDetails: cityDetails,
-        weatherDetails: weatherDetails
-      };
-      this.setState({
-        weatherData: requestData,
-        isVisible: !this.state.isVisible
-      });
+  fetchDetails = async city => {
+    const cityDetails = await this.cityData(
+      `http://dataservice.accuweather.com/locations/v1/cities/search`,
+      city
+    );
+    const { Key } = cityDetails;
+    const weatherDetails = await this.currentCondition(
+      `http://dataservice.accuweather.com/currentconditions/v1/${Key}`
+    );
+    const requestData = {
+      cityDetails: cityDetails,
+      weatherDetails: weatherDetails
     };
+    return this.setState({
+      weatherData: requestData,
+      isVisible: !this.state.isVisible,
+      isLoading: !this.state.isLoading
+    });
+  };
+
+  componentDidMount() {
+    const city = this.state.city;
+    this.fetchDetails(city);
   }
 
   submitFunc = e => {
     e.preventDefault();
-    const city = this.state.city;
-    this.fetchDetails(city);
     this.setState({
       city: "",
-      isVisible: ""
+      isVisible: "",
+      isLoading: ""
     });
   };
 
@@ -112,10 +117,11 @@ class WeatherComponent extends Component {
             className="form-control p-4 "
           />
         </form>
+        {this.state.isLoading ? <LoadingComponent /> : null}
         {this.state.isVisible ? (
           <UiComponent cityname={this.state.weatherData} />
         ) : (
-          <h6>No Data</h6>
+          <h6 className="mt-5">No Data</h6>
         )}
       </div>
     );
