@@ -1,12 +1,38 @@
 import React, { Component } from "react";
 import axios from "axios";
 
+const UiComponent = ({ cityname }) => {
+  return (
+    <React.Fragment>
+      <div className="card shadow-lg rounded">
+        <img
+          src="https://dummyimage.com/640x360/fff/aaa"
+          alt=""
+          className="card-img-top"
+          id="weatherimg"
+        />
+        <div className="bg-light mx-auto text-center icon">
+          <img src="" alt="" />
+        </div>
+        <div className="text-muted text-uppercase text-center citydetails">
+          <h4 className="my-3">{cityname.cityDetails.EnglishName}</h4>
+          <div className="my-3">{cityname.weatherDetails.WeatherText}</div>
+          <div className="display-4 my-4">
+            <span>{cityname.weatherDetails.Temperature.Metric.Value}</span>
+            <span>&deg; C</span>
+          </div>
+        </div>
+      </div>
+    </React.Fragment>
+  );
+};
 class WeatherComponent extends Component {
   constructor(props) {
     super(props);
     this.state = {
       weatherData: [],
-      city: ""
+      city: "",
+      isVisible: false
     };
     this.apikey = "EGbDx8Ku6WQxGWpwkB4KoWZ95jEjfxxb";
   }
@@ -31,13 +57,8 @@ class WeatherComponent extends Component {
     });
   };
 
-  submitFunc = e => {
-    e.preventDefault();
-    console.log(this.state.city);
-  };
-
   componentDidMount() {
-    const fetchDetails = async city => {
+    this.fetchDetails = async city => {
       const cityDetails = await this.cityData(
         `http://dataservice.accuweather.com/locations/v1/cities/search`,
         city
@@ -51,15 +72,16 @@ class WeatherComponent extends Component {
         weatherDetails: weatherDetails
       };
       this.setState({
-        weatherData: requestData
+        weatherData: requestData,
+        isVisible: !this.state.isVisible
       });
     };
-
-    fetchDetails("Accra");
   }
 
-  myStyle = {
-    display: "none"
+  submitFunc = e => {
+    e.preventDefault();
+    const city = this.state.city;
+    this.fetchDetails(city);
   };
 
   render() {
@@ -78,25 +100,11 @@ class WeatherComponent extends Component {
             className="form-control p-4 "
           />
         </form>
-        <div className="card shadow-lg rounded" style={this.myStyle}>
-          <img
-            src="https://dummyimage.com/640x360/fff/aaa"
-            alt=""
-            className="card-img-top"
-            id="weatherimg"
-          />
-          <div className="bg-light mx-auto text-center icon">
-            <img src="" alt="" />
-          </div>
-          <div className="text-muted text-uppercase text-center citydetails">
-            <h4 className="my-3">Name of city</h4>
-            <div className="my-3">Weather Condition</div>
-            <div className="display-4 my-4">
-              <span>temp</span>
-              <span>&deg; C</span>
-            </div>
-          </div>
-        </div>
+        {this.state.isVisible ? (
+          <UiComponent cityname={this.state.weatherData} />
+        ) : (
+          <h6>No Data</h6>
+        )}
       </div>
     );
   }
