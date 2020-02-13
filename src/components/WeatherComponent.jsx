@@ -6,13 +6,20 @@ const UiComponent = ({ cityname }) => {
     <React.Fragment>
       <div className="card shadow-lg rounded">
         <img
-          src="https://dummyimage.com/640x360/fff/aaa"
+          src={
+            cityname.weatherDetails.IsDayTime
+              ? require("../img/day.svg")
+              : require("../img/night.svg")
+          }
           alt=""
           className="card-img-top"
           id="weatherimg"
         />
         <div className="bg-light mx-auto text-center icon">
-          <img src="" alt="" />
+          <img
+            src={require(`../img/icons/${cityname.weatherDetails.WeatherIcon}.svg`)}
+            alt=""
+          />
         </div>
         <div className="text-muted text-uppercase text-center citydetails">
           <h4 className="my-3">{cityname.cityDetails.EnglishName}</h4>
@@ -82,6 +89,10 @@ class WeatherComponent extends Component {
     e.preventDefault();
     const city = this.state.city;
     this.fetchDetails(city);
+    this.setState({
+      city: "",
+      isVisible: ""
+    });
   };
 
   render() {
@@ -96,6 +107,7 @@ class WeatherComponent extends Component {
           <input
             type="text"
             name="city"
+            value={this.state.city}
             onChange={this.cityValue}
             className="form-control p-4 "
           />
