@@ -67,6 +67,9 @@ class WeatherComponent extends Component {
   };
 
   fetchDetails = async city => {
+    this.setState({
+      isLoading: !this.state.isLoading
+    });
     const cityDetails = await this.cityData(
       `http://dataservice.accuweather.com/locations/v1/cities/search`,
       city
@@ -75,28 +78,26 @@ class WeatherComponent extends Component {
     const weatherDetails = await this.currentCondition(
       `http://dataservice.accuweather.com/currentconditions/v1/${Key}`
     );
+
     const requestData = {
       cityDetails: cityDetails,
       weatherDetails: weatherDetails
     };
-    return this.setState({
+
+    this.setState({
       weatherData: requestData,
       isVisible: !this.state.isVisible,
       isLoading: !this.state.isLoading
     });
   };
 
-  componentDidMount() {
-    const city = this.state.city;
-    this.fetchDetails(city);
-  }
-
   submitFunc = e => {
     e.preventDefault();
+    const city = this.state.city;
+    this.fetchDetails(city);
     this.setState({
       city: "",
-      isVisible: "",
-      isLoading: ""
+      isVisible: false
     });
   };
 
@@ -114,7 +115,7 @@ class WeatherComponent extends Component {
             name="city"
             value={this.state.city}
             onChange={this.cityValue}
-            className="form-control p-4 "
+            className="form-control p-4"
           />
         </form>
         {this.state.isLoading ? <LoadingComponent /> : null}
