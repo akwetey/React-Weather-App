@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useState } from "react";
 import LoadingComponent from "./LoadingComponent";
 import axios from "axios";
 
@@ -34,7 +34,86 @@ const UiComponent = ({ cityname }) => {
     </React.Fragment>
   );
 };
-class WeatherComponent extends Component {
+
+//using hooks
+const WeatherComponent = () => {
+  const [weatherData, setWeatherData] = useState([]);
+  const [city, setCity] = useState("");
+  const [isVisible, setIsVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const apikey = "EGbDx8Ku6WQxGWpwkB4KoWZ95jEjfxxb";
+
+  //get current condition
+  const currentCondition = async url => {
+    const query = `?apikey=${apikey}`;
+    const response = await axios.get(url + query);
+    return await response.data[0];
+  };
+
+  //get city location
+  const cityData = async (url, city) => {
+    const query = `?apikey=${apikey}&q=${city}`;
+    const response = await axios.get(url + query);
+    return await response.data[0];
+  };
+
+  const cityValue = e => {
+    setCity(e.target.value);
+  };
+
+  const fetchDetails = async city => {
+    setIsLoading(true);
+
+    const cityDetails = await cityData(
+      `http://dataservice.accuweather.com/locations/v1/cities/search`,
+      city
+    );
+    const { Key } = cityDetails;
+    const weatherDetails = await currentCondition(
+      `http://dataservice.accuweather.com/currentconditions/v1/${Key}`
+    );
+
+    const requestData = {
+      cityDetails: cityDetails,
+      weatherDetails: weatherDetails
+    };
+
+    setWeatherData(requestData);
+    setIsVisible(true);
+    setIsLoading(false);
+  };
+
+  const submitFunc = e => {
+    e.preventDefault();
+    fetchDetails(city);
+    setCity("");
+    setIsVisible(false);
+  };
+
+  return (
+    <div className="container my-5 mx-auto">
+      <h1 className="text-muted text-center my-4">React Weather App</h1>
+      <form className="text-center text-muted my-4" onSubmit={submitFunc}>
+        <label htmlFor="city">Enter a location</label>
+        <input
+          type="text"
+          name="city"
+          value={city}
+          onChange={cityValue}
+          className="form-control p-4"
+        />
+      </form>
+      {isLoading ? <LoadingComponent /> : null}
+      {isVisible ? (
+        <UiComponent cityname={weatherData} />
+      ) : (
+        <h6 className="mt-5">No Data</h6>
+      )}
+    </div>
+  );
+};
+
+/* class WeatherComponent extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -93,7 +172,7 @@ class WeatherComponent extends Component {
 
   submitFunc = e => {
     e.preventDefault();
-    const city = this.state.city;
+    const { city } = this.state;
     this.fetchDetails(city);
     this.setState({
       city: "",
@@ -127,6 +206,6 @@ class WeatherComponent extends Component {
       </div>
     );
   }
-}
+} */
 
 export default WeatherComponent;
